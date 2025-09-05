@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>uploadgate — Glassmorphism File Uploader</title>
+  <link rel="preconnect" href="https://ucarecdn.com" crossorigin>
+  <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
+  <style>
+    :root {
+      --bg1: #0b1020;
+      --bg2: #121a2e;
+      --card: rgba(255, 255, 255, .08);
+      --card-2: rgba(255, 255, 255, .04);
+      --border: rgba(255, 255, 255, .22);
+      --text: #ecf1ff;
+      --muted: rgba(236, 241, 255, .64);
+      --accent: #7aa2ff;
+      --accent-2: #a6ffda;
+      --danger: #ff6b6b;
+      --success: #48d597;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(1200px 800px at -10% -20%, #1b2450 0%, transparent 60%),
+        radial-gradient(1000px 700px at 110% 10%, #163044 0%, transparent 55%),
+        linear-gradient(140deg, var(--bg1), var(--bg2));
+      color: var(--text);
+      font: 400 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      overflow-x: hidden;
+    }
+
+    .uploadcare--widget__button,
+    .uploadcare--widget {
+      display: none;
+    }
+
+    /* App Shell */
+    .shell {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .9rem 1rem;
+      background: linear-gradient(180deg, rgba(0, 0, 0, .35), rgba(0, 0, 0, 0));
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    .logo-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #071427;
+      font-weight: 900;
+      box-shadow: var(--shadow);
+    }
+
+    .version {
+      opacity: .7;
+      font-size: .875rem
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: min(980px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 20px 22px;
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-head h1 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .muted {
+      color: var(--muted)
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr
+      }
+
+      .card-head {
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .card-head .muted {
+        text-align: center;
+      }
+    }
+
+    /* Dropzone */
+    .dropwrap {
+      padding: 22px;
+    }
+
+    .drop {
+      display: grid;
+      place-items: center;
+      gap: 14px;
+      text-align: center;
+      padding: clamp(28px, 5vw, 48px);
+      border: 2px dashed rgba(255, 255, 255, .28);
+      border-radius: calc(var(--radius) - 6px);
+      background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .02));
+      transition: all .2s ease;
+      cursor: pointer;
+    }
+
+    .drop:hover {
+      border-color: var(--accent);
+    }
+
+    .drop.dragover {
+      border-color: var(--accent-2);
+      background: linear-gradient(180deg, rgba(166, 255, 218, .12), rgba(255, 255, 255, .03));
+      transform: translateY(-1px);
+    }
+
+    .drop .bigicon {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(122, 162, 255, .2), rgba(166, 255, 218, .18));
+      border: 1px solid rgba(255, 255, 255, .2);
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(122, 162, 255, .25), rgba(166, 255, 218, .18));
+      color: var(--text);
+      font-weight: 600;
+      padding: .8rem 1rem;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform .08s ease;
+      box-shadow: var(--shadow);
+    }
+
+    .btn:active {
+      transform: translateY(1px)
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center
+    }
+
+    /* Right column: status/result */
+    .panel {
+      padding: 22px;
+      border-left: 1px solid var(--border);
+    }
+
+    @media (max-width: 900px) {
+      .panel {
+        border-left: none;
+        border-top: 1px solid var(--border)
+      }
+    }
+
+    .status {
+      display: grid;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    progress {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    progress::-webkit-progress-bar {
+      background: rgba(255, 255, 255, .12)
+    }
+
+    progress::-webkit-progress-value {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2))
+    }
+
+    progress::-moz-progress-bar {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2))
+    }
+
+    .result {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border: 1px dashed rgba(255, 255, 255, .28);
+      border-radius: 14px;
+    }
+
+    .thumb {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .input-copy {
+      display: flex;
+      gap: 8px;
+    }
+
+    .input-copy input {
+      flex: 1;
+      padding: .8rem .9rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, .05);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .tiny {
+      font-size: .8rem;
+      opacity: .8
+    }
+
+    footer {
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: .9rem
+    }
+
+    a {
+      color: var(--accent)
+    }
+
+    .hide {
+      display: none
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <header aria-label="App header">
+      <div class="logo" role="banner">
+        <div class="logo-badge" aria-hidden="true">UG</div>
+        <div>
+          UploadGate
+        </div>
+      </div>
+      <span class="version muted" aria-label="version">v1.0</span>
+    </header>
+
+    <main>
+      <section class="card" role="main">
+        <div class="card-head">
+          <h1>Upload an image</h1>
+          <div class="muted">Drag &amp; drop, or click to select • CDN link on completion</div>
+        </div>
+
+        <div class="grid">
+          <!-- Left: Dropzone -->
+          <div class="dropwrap">
+            <div id="drop" class="drop" role="button" tabindex="0" aria-label="Drag and drop area (click to select)">
+              <div class="row">
+                <button id="selectBtn" class="btn">Choose a file</button>
+                <button id="pasteBtn" class="btn" title="Paste image from clipboard (Ctrl/Cmd+V)">Paste from
+                  clipboard</button>
+              </div>
+              <div class="tiny muted">PNG, JPG, WEBP — up to 10 MB</div>
+            </div>
+          </div>
+
+          <!-- Right: Status / Result -->
+          <aside class="panel">
+            <div id="statusBox" class="status hide" aria-live="polite">
+              <div>Uploading…</div>
+              <progress id="pg" max="100" value="0" aria-label="Upload progress"></progress>
+              <div class="tiny muted" id="bytes">0%</div>
+            </div>
+
+            <div id="resultBox" class="result hide">
+              <img id="thumb" class="thumb hide" alt="Uploaded preview" />
+              <div class="input-copy">
+                <input id="cdn" readonly value="" aria-label="CDN URL" />
+                <button id="copy" class="btn" title="Copy URL">Copy</button>
+              </div>
+              <div class="row">
+                <a id="openCdn" href="#" target="_blank" rel="noopener" class="btn">Open link</a>
+                <button id="again" class="btn" title="Upload another">Upload another</button>
+              </div>
+              <div class="tiny muted">Use this link to access the image directly.</div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Built with Uploadcare CDN. <span class="tiny">Tip: you can resize images via URL parameters (e.g.,
+        <code>-/scale_crop/800x600/</code>).</span>
+    </footer>
+  </div>
+
+  <!-- Hidden Uploadcare widget anchor (images only) -->
+  <input id="uploader" type="hidden" role="uploadcare-uploader" data-public-key="de9ed09d4ce1948a83c2"
+    data-images-only="true" data-multiple="false" />
+
+  <script>
+    // Init widget instance for programmatic control
+    const widget = uploadcare.Widget('#uploader');
+
+    const drop = document.getElementById('drop');
+    const selectBtn = document.getElementById('selectBtn');
+    const pasteBtn = document.getElementById('pasteBtn');
+    const statusBox = document.getElementById('statusBox');
+    const resultBox = document.getElementById('resultBox');
+    const pg = document.getElementById('pg');
+    const bytes = document.getElementById('bytes');
+    const cdn = document.getElementById('cdn');
+    const copyBtn = document.getElementById('copy');
+    const openCdn = document.getElementById('openCdn');
+    const again = document.getElementById('again');
+    const thumb = document.getElementById('thumb');
+
+    function show(el) { el.classList.remove('hide') }
+    function hide(el) { el.classList.add('hide') }
+    function resetUI() {
+      hide(statusBox);
+      hide(resultBox);
+      cdn.value = '';
+      pg.value = 0; bytes.textContent = '0%';
+      thumb.src = ''; hide(thumb);
+    }
+
+    // Trigger Uploadcare dialog
+    selectBtn.addEventListener('click', () => {
+      widget.openDialog(null, { imagesOnly: true });
+    });
+
+    // Drag & drop behavior
+    ['dragenter', 'dragover'].forEach(evt => {
+      drop.addEventListener(evt, e => {
+        e.preventDefault(); e.stopPropagation();
+        drop.classList.add('dragover');
+      });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      drop.addEventListener(evt, e => {
+        e.preventDefault(); e.stopPropagation();
+        drop.classList.remove('dragover');
+      });
+    });
+    drop.addEventListener('drop', (e) => {
+      const file = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (!file) { return; }
+      // Only allow images
+      if (!file.type.startsWith('image/')) {
+        alert('Please drop an image file (PNG, JPG, WEBP).');
+        return;
+      }
+      uploadViaSDK(file);
+    });
+
+    drop.addEventListener('click', () => widget.openDialog(null, { imagesOnly: true }));
+    drop.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        widget.openDialog(null, { imagesOnly: true });
+      }
+    });
+
+    // Paste from clipboard
+    pasteBtn.addEventListener('click', () => {
+      navigator.clipboard.read().then(items => {
+        for (const item of items) {
+          for (const type of item.types) {
+            if (type.startsWith('image/')) {
+              item.getType(type).then(blob => {
+                uploadViaSDK(new File([blob], 'pasted-image', { type }));
+              });
+              return;
+            }
+          }
+        }
+        alert('No image found in clipboard.');
+      }).catch(() => {
+        alert('Clipboard read is not allowed by the browser. Try Ctrl/Cmd+V directly on the page.');
+      });
+    });
+
+    // Hook widget completion too (covers click-to-select flow)
+    widget.onUploadComplete(function (info) {
+      renderResult(info);
+    });
+
+    // Manual SDK upload (for drag & drop / paste)
+    function uploadViaSDK(fileObj) {
+      resetUI();
+      show(statusBox);
+      const file = uploadcare.fileFrom('object', fileObj);
+      // Progress polling
+      file.progress(function (p) {
+        const percent = Math.round((p.progress || 0) * 100);
+        pg.value = percent;
+        bytes.textContent = percent + '%';
+      });
+      file.done(function (info) {
+        renderResult(info);
+      });
+      file.fail(function (err) {
+        hide(statusBox);
+        alert('Upload failed. ' + (err && err.message ? err.message : 'Please try again.'));
+      });
+    }
+
+    function renderResult(info) {
+      hide(statusBox);
+      show(resultBox);
+      const url = info.cdnUrl || info.cdnUrlModifiers ? (info.cdnUrl + (info.cdnUrlModifiers || '')) : info.cdnUrl;
+      cdn.value = url;
+      openCdn.href = url;
+      if (info.isImage && url) {
+        thumb.src = url + '-/preview/';
+        thumb.onload = () => show(thumb);
+      }
+    }
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(cdn.value);
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => copyBtn.textContent = 'Copy', 900);
+      } catch {
+        alert('Copy failed. Select and copy the URL manually.');
+      }
+    });
+
+    again.addEventListener('click', () => {
+      resetUI();
+      widget.openDialog(null, { imagesOnly: true });
+    });
+  </script>
+</body>
+
+</html>
